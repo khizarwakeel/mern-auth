@@ -15,13 +15,13 @@ const Header = () => {
         </Link>
         <div>
           <ul className="flex gap-6 text-gray-600">
-            <Link to={"/"}>
+            <Link to={"/"} className="hover:text-[#2680f0]">
               <li>Home</li>
             </Link>
-            <Link to={"/about"}>
+            <Link to={"/about"} className="hover:text-[#2680f0]">
               <li>About</li>
             </Link>
-            <Link to={"/sign-in"}>
+            <Link to={"/sign-in"} className="hover:text-[#2680f0]">
               <li>Signin</li>
             </Link>
           </ul>
