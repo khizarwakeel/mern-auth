@@ -1,1 +1,2 @@
-Client Tech => React, Redux, Tailwind CSS
+# Client Tech:
+React, Redux, Tailwind CSS
