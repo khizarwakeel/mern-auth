@@ -6,6 +6,7 @@ import {
   signInFailure,
 } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import OAuth from "../components/OAuth";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -105,12 +106,7 @@ export default function SignIn() {
               </button>
             </div>
             <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center uppercase rounded-md bg-red-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
-              >
-                Continue with Google
-              </button>
+             <OAuth />
             </div>
           </form>
           <p className="mt-5 text-sm text-gray-500">
