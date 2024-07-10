@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
     },
     profilePicture : {
       type : String,
-      default : "https://static.vecteezy.com/system/resources/thumbnails/024/095/208/small_2x/happy-young-man-smiling-free-png.png"
+      default : "https://static.vecteezy.com/system/resources/thumbnails/019/900/306/small_2x/happy-young-cute-illustration-face-profile-png.png"
     }
   },
   { timestamps: true }
