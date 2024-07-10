@@ -12,28 +12,22 @@ const Header = () => {
             <img
               src="/assets/logo.png"
               alt="MERN Auth"
-              className="md:w-12 w-6"
+              className="md:w-12 w-10"
             />
           </div>
           <div>
-            <h4 className="md:text-3xl text-sm">MERN Auth</h4>
+            <h4 className="md:text-3xl text-xl font-semibold">MERN Auth</h4>
           </div>
         </Link>
         <div>
-          <ul className="flex items-center md:gap-10 gap-3 text-gray-60 text-sm md:text-base">
-            <Link to={"/"} className="hover:text-[#2680f0]">
-              <li>Home</li>
-            </Link>
-            <Link to={"/about"} className="hover:text-[#2680f0]">
-              <li>About</li>
-            </Link>
+          <ul className="flex items-center md:gap-10 gap-3 text-gray-60 text-base">
             {currentUser ? (
               <Link to={"/profile"} className="hover:text-[#2680f0]">
                 <img
                   src={currentUser.profilePicture}
                   alt={currentUser.username}
                   title={currentUser.username}
-                  className="md:h-14 md:w-14 h-10 w-10 rounded-full border border-gray-400 p-1 object-cover"
+                  className="h-14 w-14 rounded-full object-cover bg-teal-700"
                 />
               </Link>
             ) : (
