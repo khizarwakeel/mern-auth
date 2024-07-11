@@ -1,47 +1,93 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import OAuth from "../components/OAuth";
 import { useSelector } from "react-redux";
+import { useRef, useState, useEffect } from "react";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { app } from "../firebase";
 
 export default function Profile() {
-
-  const {currentUser} = useSelector(state => state.user);
-
+  const fileRef = useRef(null);
+  const [image, setImage] = useState(undefined);
+  const [uploadProgress, setUploadProgress] = useState(``);
+  const [uploadMessage, setUploadMessage] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const { currentUser } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (image) {
+      handleFileUpload(image);
+    }
+  }, [image]);
+
+  const handleFileUpload = async (image) => {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + image.name;
+    const storageRef = ref(storage, fileName);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(`Upload is ${Math.round(progress)}% done`);
+        console.log("Upload is " + Math.round(progress) + "% done");
+      },
+      (error) => {
+        setImageError("Upload failed:", error);
+      },
+      () => {
+        setUploadProgress("");
+        setUploadMessage(true);
+        setTimeout(() => {
+          setUploadMessage(false);
+        }, 3000);
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setFormData({ ...formData, profilePicture: downloadURL });
+        });
+      }
+    );
+  };
+
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const api = "/api/auth/signup";
-  const headersData = { "Content-Type": "application/json" };
+  // const api = "/api/auth/signup";
+  // const headersData = { "Content-Type": "application/json" };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
+  // const handleChange = (e) => {
+  //   setFormData({ ...formData, [e.target.id]: e.target.value });
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      setError(false);
-      const res = await fetch(api, {
-        method: "POST",
-        headers: headersData,
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      console.log(data);
-      setLoading(false);
-      if (data.success === false) {
-        setError(true);
-        return;
-      }
-      navigate("/sign-in");
-    } catch (error) {
-      setLoading(false);
-      setError(true);
-    }
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     setLoading(true);
+  //     setError(false);
+  //     const res = await fetch(api, {
+  //       method: "POST",
+  //       headers: headersData,
+  //       body: JSON.stringify(formData),
+  //     });
+  //     const data = await res.json();
+  //     console.log(data);
+  //     setLoading(false);
+  //     if (data.success === false) {
+  //       setError(true);
+  //       return;
+  //     }
+  //     navigate("/sign-in");
+  //   } catch (error) {
+  //     setLoading(false);
+  //     setError(true);
+  //   }
+  // };
 
   return (
     <>
@@ -52,17 +98,49 @@ export default function Profile() {
           </h2>
         </div>
         <div className="flex justify-center mt-5 mb-2 ">
+          <input
+            type="file"
+            ref={fileRef}
+            hidden
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
           <span className="border p-1 rounded-full">
             <img
               src={currentUser.profilePicture}
               alt={currentUser.username}
               title={currentUser.username}
-              className="w-16 h-16 rounded-full bg-teal-700 cursor-pointer object-cover"
+              className="w-16 h-16 rounded-full bg-teal-700 cursor-pointer object-cover hover:opacity-80"
+              onClick={() => fileRef.current.click()}
             />
           </span>
         </div>
+        <div>
+          {imageError ? (
+            <p className="text-center text-red-700 font-bold">
+              Error uploading image<br />
+              (File size must be less than 2 MB)
+            </p>
+          ) : (
+            <>
+              {uploadProgress && (
+                <p className="text-center text-teal-700 font-bold">
+                  {uploadProgress}
+                </p>
+              )}
+              {uploadMessage && (
+                <p className="text-center text-teal-700 font-bold">
+                  Upload completed successfully
+                </p>
+              )}
+            </>
+          )}
+        </div>
         <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form
+            className="space-y-6"
+            // onSubmit={handleSubmit}
+          >
             <div>
               <label
                 htmlFor="username"
@@ -72,10 +150,10 @@ export default function Profile() {
               </label>
               <div className="mt-2">
                 <input
-                defaultValue={currentUser.username}
+                  defaultValue={currentUser.username}
                   id="username"
                   name="username"
-                  onChange={handleChange}
+                  // onChange={handleChange}
                   type="text"
                   autoComplete="username"
                   required
@@ -92,10 +170,10 @@ export default function Profile() {
               </label>
               <div className="mt-2">
                 <input
-                defaultValue={currentUser.email}
+                  defaultValue={currentUser.email}
                   id="email"
                   name="email"
-                  onChange={handleChange}
+                  // onChange={handleChange}
                   type="email"
                   autoComplete="email"
                   required
@@ -116,7 +194,7 @@ export default function Profile() {
                 <input
                   id="password"
                   name="password"
-                  onChange={handleChange}
+                  // onChange={handleChange}
                   type="password"
                   autoComplete="current-password"
                   required
@@ -134,26 +212,26 @@ export default function Profile() {
               </button>
             </div>
           </form>
-            <div className="flex justify-between gap-5 mt-6">
-              <div className="w-full">
-                <button
-                  disabled={loading}
-                  type="submit"
-                  className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
-                >
-                  {loading ? "Deleting..." : "Delete"}
-                </button>
-              </div>
-              <div className="w-full">
-                <button
-                  disabled={loading}
-                  type="submit"
-                  className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
-                >
-                  {loading ? "Sign Outing..." : "Sign Out"}
-                </button>
-              </div>
+          <div className="flex justify-between gap-5 mt-6">
+            <div className="w-full">
+              <button
+                disabled={loading}
+                type="submit"
+                className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
+              >
+                {loading ? "Deleting..." : "Delete"}
+              </button>
             </div>
+            <div className="w-full">
+              <button
+                disabled={loading}
+                type="submit"
+                className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
+              >
+                {loading ? "Sign Outing..." : "Sign Out"}
+              </button>
+            </div>
+          </div>
           {error && (
             <div
               className="flex mt-5 justify-center items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
