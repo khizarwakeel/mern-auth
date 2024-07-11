@@ -8,15 +8,24 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
+import { useDispatch } from "react-redux";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+} from "../redux/user/userSlice";
 
 export default function Profile() {
   const fileRef = useRef(null);
   const [image, setImage] = useState(undefined);
   const [uploadProgress, setUploadProgress] = useState(``);
   const [uploadMessage, setUploadMessage] = useState(false);
+  const [updateUser, setUpdateUser] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
+  const dispatch = useDispatch();
+  console.log(formData);
 
   useEffect(() => {
     if (image) {
@@ -53,41 +62,38 @@ export default function Profile() {
       }
     );
   };
-
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // const api = "/api/auth/signup";
-  // const headersData = { "Content-Type": "application/json" };
+  const api = `/api/user/update/${currentUser._id}`;
+  const headersData = { "Content-Type": "application/json" };
 
-  // const handleChange = (e) => {
-  //   setFormData({ ...formData, [e.target.id]: e.target.value });
-  // };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     setLoading(true);
-  //     setError(false);
-  //     const res = await fetch(api, {
-  //       method: "POST",
-  //       headers: headersData,
-  //       body: JSON.stringify(formData),
-  //     });
-  //     const data = await res.json();
-  //     console.log(data);
-  //     setLoading(false);
-  //     if (data.success === false) {
-  //       setError(true);
-  //       return;
-  //     }
-  //     navigate("/sign-in");
-  //   } catch (error) {
-  //     setLoading(false);
-  //     setError(true);
-  //   }
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch(updateUserStart());
+    try {
+      const res = await fetch(api, {
+        method: "POST",
+        headers: headersData,
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data));
+        return;
+      }
+      dispatch(updateUserSuccess(data));
+      setUpdateUser(true);
+      setTimeout(() => {
+        setUpdateUser(false);
+      }, 3000);
+    } catch (error) {
+      dispatch(updateUserFailure(data));
+    }
+  };
 
   return (
     <>
@@ -138,10 +144,7 @@ export default function Profile() {
           )}
         </div>
         <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form
-            className="space-y-6"
-            // onSubmit={handleSubmit}
-          >
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="username"
@@ -154,7 +157,7 @@ export default function Profile() {
                   defaultValue={currentUser.username}
                   id="username"
                   name="username"
-                  // onChange={handleChange}
+                  onChange={handleChange}
                   type="text"
                   autoComplete="username"
                   required
@@ -174,7 +177,7 @@ export default function Profile() {
                   defaultValue={currentUser.email}
                   id="email"
                   name="email"
-                  // onChange={handleChange}
+                  onChange={handleChange}
                   type="email"
                   autoComplete="email"
                   required
@@ -195,10 +198,9 @@ export default function Profile() {
                 <input
                   id="password"
                   name="password"
-                  // onChange={handleChange}
+                  onChange={handleChange}
                   type="password"
                   autoComplete="current-password"
-                  required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 outline-none pl-2 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -216,20 +218,18 @@ export default function Profile() {
           <div className="flex justify-between gap-5 mt-6">
             <div className="w-full">
               <button
-                disabled={loading}
                 type="submit"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
-                {loading ? "Deleting..." : "Delete"}
+                Delete
               </button>
             </div>
             <div className="w-full">
               <button
-                disabled={loading}
                 type="submit"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
-                {loading ? "Sign Outing..." : "Sign Out"}
+                Sign Out
               </button>
             </div>
           </div>
@@ -249,6 +249,29 @@ export default function Profile() {
               </svg>
               <span className="sr-only">Info</span>
               <div>Something went wrong!</div>
+            </div>
+          )}
+          {updateUser && (
+            <div
+              className="flex mt-5 justify-center items-center p-4 mb-4 text-sm bg-teal-700 rounded-lg text-white"
+              role="alert"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m4.5 12.75 6 6 9-13.5"
+                />
+              </svg>
+              <span className="sr-only">Success</span>
+              <div>User updated successfully!</div>
             </div>
           )}
         </div>
