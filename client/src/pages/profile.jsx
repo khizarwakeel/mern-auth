@@ -107,7 +107,7 @@ export default function Profile() {
           />
           <span className="border p-1 rounded-full">
             <img
-              src={currentUser.profilePicture}
+              src={formData.profilePicture || currentUser.profilePicture}
               alt={currentUser.username}
               title={currentUser.username}
               className="w-16 h-16 rounded-full bg-teal-700 cursor-pointer object-cover hover:opacity-80"
@@ -118,7 +118,8 @@ export default function Profile() {
         <div>
           {imageError ? (
             <p className="text-center text-red-700 font-bold">
-              Error uploading image<br />
+              Error uploading image
+              <br />
               (File size must be less than 2 MB)
             </p>
           ) : (
