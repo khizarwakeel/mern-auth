@@ -27,7 +27,7 @@ const Header = () => {
                   src={currentUser.profilePicture}
                   alt={currentUser.username}
                   title={currentUser.username}
-                  className="h-14 w-14 rounded-full object-cover bg-teal-700"
+                  className="h-14 w-14 rounded-full object-cover bg-[#2680f0]"
                 />
               </Link>
             ) : (

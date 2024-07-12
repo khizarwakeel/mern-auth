@@ -146,7 +146,7 @@ export default function Profile() {
               src={formData.profilePicture || currentUser.profilePicture}
               alt={currentUser.username}
               title={currentUser.username}
-              className="w-16 h-16 rounded-full bg-teal-700 cursor-pointer object-cover hover:opacity-80"
+              className="w-16 h-16 rounded-full bg-[#2680f0] cursor-pointer object-cover hover:opacity-80"
               onClick={() => fileRef.current.click()}
             />
           </span>
