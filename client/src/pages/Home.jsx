@@ -8,7 +8,7 @@ const Home = () => {
         <h1 className="md:text-5xl text-xl">
           Welcome!{" "}
           <span className="mt-10 font-bold text-[#2680f0]">
-            {currentUser.username}
+            {currentUser?.username}
           </span>
         </h1>
         <p className="md:text-xl text-base md:mt-10 mt-5">
