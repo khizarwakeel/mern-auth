@@ -13,6 +13,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserFailure,
+  deleteUserSuccess,
 } from "../redux/user/userSlice";
 
 export default function Profile() {
@@ -94,6 +97,23 @@ export default function Profile() {
       dispatch(updateUserFailure(data));
     }
   };
+
+  const handleDeleteAccount = async () => {
+try {
+  dispatch(deleteUserStart())
+  const res = await fetch(`/api/user/delete/${currentUser._id}`,{
+    method : 'DELETE',
+  });
+  const data = await res.json();
+  if (data.success === false) {
+    dispatch(deleteUserFailure(data))
+    return
+  }
+  dispatch(deleteUserSuccess(data))
+} catch (error) {
+  dispatch(deleteUserFailure(error))
+}
+  }
 
   return (
     <>
@@ -218,7 +238,8 @@ export default function Profile() {
           <div className="flex justify-between gap-5 mt-6">
             <div className="w-full">
               <button
-                type="submit"
+              onClick={handleDeleteAccount}
+                type="button"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
                 Delete
@@ -226,7 +247,7 @@ export default function Profile() {
             </div>
             <div className="w-full">
               <button
-                type="submit"
+                type="button"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
                 Sign Out
