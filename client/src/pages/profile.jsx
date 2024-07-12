@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import {
@@ -16,6 +16,7 @@ import {
   deleteUserStart,
   deleteUserFailure,
   deleteUserSuccess,
+  signOut,
 } from "../redux/user/userSlice";
 
 export default function Profile() {
@@ -99,21 +100,30 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-try {
-  dispatch(deleteUserStart())
-  const res = await fetch(`/api/user/delete/${currentUser._id}`,{
-    method : 'DELETE',
-  });
-  const data = await res.json();
-  if (data.success === false) {
-    dispatch(deleteUserFailure(data))
-    return
-  }
-  dispatch(deleteUserSuccess(data))
-} catch (error) {
-  dispatch(deleteUserFailure(error))
-}
-  }
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error));
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/signout");
+      dispatch(signOut());
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -238,7 +248,7 @@ try {
           <div className="flex justify-between gap-5 mt-6">
             <div className="w-full">
               <button
-              onClick={handleDeleteAccount}
+                onClick={handleDeleteAccount}
                 type="button"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
@@ -247,6 +257,7 @@ try {
             </div>
             <div className="w-full">
               <button
+                onClick={handleSignOut}
                 type="button"
                 className="uppercase bg-red-700 text-white rounded-md w-full px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2680f0]"
               >
