@@ -1,4 +1,4 @@
-MERN Auth using (React, Redux, Tailwind CSS, Node, Express, MongoDB, JWT)
+## MERN Auth using (React, Redux, Tailwind CSS, Node, Express, MongoDB, JWT)
 Add this:
 MONGO_URI
 JWT_SECRET
